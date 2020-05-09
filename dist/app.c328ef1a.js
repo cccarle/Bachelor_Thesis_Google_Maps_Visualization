@@ -117,9 +117,9 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/_empty.js":[function(require,module,exports) {
+})({"../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/_empty.js":[function(require,module,exports) {
 
-},{}],"../../../../usr/local/lib/node_modules/parcel-bundler/node_modules/process/browser.js":[function(require,module,exports) {
+},{}],"../../../../../usr/local/lib/node_modules/parcel-bundler/node_modules/process/browser.js":[function(require,module,exports) {
 
 // shim for using process in browser
 var process = module.exports = {}; // cached from whatever global is present so that test runners that stub it
@@ -328,7 +328,7 @@ process.chdir = function (dir) {
 process.umask = function () {
   return 0;
 };
-},{}],"../../../../usr/local/lib/node_modules/parcel-bundler/node_modules/path-browserify/index.js":[function(require,module,exports) {
+},{}],"../../../../../usr/local/lib/node_modules/parcel-bundler/node_modules/path-browserify/index.js":[function(require,module,exports) {
 var process = require("process");
 // .dirname, .basename, and .extname methods are extracted from Node.js v8.11.1,
 // backported and transplited with Babel, with backwards-compat fixes
@@ -633,7 +633,7 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-},{"process":"../../../../usr/local/lib/node_modules/parcel-bundler/node_modules/process/browser.js"}],"node_modules/dotenv/lib/main.js":[function(require,module,exports) {
+},{"process":"../../../../../usr/local/lib/node_modules/parcel-bundler/node_modules/process/browser.js"}],"node_modules/dotenv/lib/main.js":[function(require,module,exports) {
 var process = require("process");
 /*::
 
@@ -764,7 +764,7 @@ function config(options
 
 module.exports.config = config;
 module.exports.parse = parse;
-},{"fs":"../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/_empty.js","path":"../../../../usr/local/lib/node_modules/parcel-bundler/node_modules/path-browserify/index.js","process":"../../../../usr/local/lib/node_modules/parcel-bundler/node_modules/process/browser.js"}],"node_modules/load-google-maps-api/index.js":[function(require,module,exports) {
+},{"fs":"../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/_empty.js","path":"../../../../../usr/local/lib/node_modules/parcel-bundler/node_modules/path-browserify/index.js","process":"../../../../../usr/local/lib/node_modules/parcel-bundler/node_modules/process/browser.js"}],"node_modules/load-google-maps-api/index.js":[function(require,module,exports) {
 const API_URL = 'https://maps.googleapis.com/maps/api/js'
 const CALLBACK_NAME = '__googleMapsApiOnLoadCallback'
 
@@ -1064,7 +1064,7 @@ var initMap = function _initMap() {
   document.addEventListener('DOMContentLoaded', function () {
     var mapElement = document.getElementById('map');
     loadGoogleMapsApi({
-      key: "AIzaSyDVxL_-voEagurltC-HoSJk9WvgFMmkTAU",
+      key: undefined,
       libraries: ['visualization']
     }).then(function (google) {
       googleMaps = google;
@@ -1247,7 +1247,7 @@ var writePositionsToJSONByClick = function writePositionsToJSONByClick() {
 
 initMap();
 changeRadius();
-},{"dotenv":"node_modules/dotenv/lib/main.js","load-google-maps-api":"node_modules/load-google-maps-api/index.js","fs":"../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/_empty.js","./calculatePolygons":"calculatePolygons.js"}],"../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"dotenv":"node_modules/dotenv/lib/main.js","load-google-maps-api":"node_modules/load-google-maps-api/index.js","fs":"../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/_empty.js","./calculatePolygons":"calculatePolygons.js"}],"../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -1275,7 +1275,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63234" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49672" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -1451,5 +1451,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","app.js"], null)
+},{}]},{},["../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","app.js"], null)
 //# sourceMappingURL=/app.c328ef1a.js.map
