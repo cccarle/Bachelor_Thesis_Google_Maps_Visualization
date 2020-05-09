@@ -19,7 +19,6 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-"use strict";
 
 
 var convexhull = new function () {

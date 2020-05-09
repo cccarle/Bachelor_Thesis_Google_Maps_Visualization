@@ -126,10 +126,11 @@ function getPolygon(coordinates, allowedDistance) {
 function run(coordinates, allowedDistance) {
     let coordinatesByTime = splitByTimestamp(coordinates)
     let polygons = {}
+    console.log(coordinatesByTime)
     for (key in coordinatesByTime) {
         polygons[key] = getPolygon(coordinatesByTime[key], allowedDistance)
-        break
     }
+    console.log(polygons)
     return polygons
 }
 

@@ -12,6 +12,7 @@ let arr = []
 let map, googleMaps, heatmap, coordinates
 let radius = 50
 
+// console.log(process.env.GOOGLE_MAPS_API_KEY)
 
 
 // const page = await import('./calculatePolygons')
@@ -58,12 +59,12 @@ const initMap = function _initMap() {
       })
 
       dataset_1 = calculateWeight(dataset_1)
-      // createPolygonLayer(dataset_1)
+      createPolygonLayer(dataset_1)
       let colorizedDataset = divideColorToCordordinates(dataset_1)
       coordinates = covertToGoogleMapsCords(dataset_1)
       //createHeatmapLayer(coordinates)
       // createOverlayView()
-      createCircelsLayer(colorizedDataset)
+      // createCircelsLayer(colorizedDataset)
       writePositionsToJSONByClick()
 
     })
@@ -111,7 +112,6 @@ const creatPolygon = (coordinates, sColor, sOpacity, weight, fColor, fOpacity) =
 
   return polygonLayer
 }
-
 /* 
 Uses creatPolygon() to creates a new separate polygon for every array returned by polygons() method. 
 */
@@ -121,6 +121,7 @@ const createPolygonLayer = (coordinates) => {
   allCords.forEach(cordsArray => {
     console.log(cordsArray)
     let polygon = creatPolygon(cordsArray, 'rgba(0, 0, 255, 1)', 1.2, 2, 'rgba(255, 0, 0, 1)', .55)
+    console.log('coord')
     polygon.setMap(map);
   });
 }

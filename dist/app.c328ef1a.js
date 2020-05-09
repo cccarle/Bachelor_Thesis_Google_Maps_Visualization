@@ -831,8 +831,6 @@ module.exports = function (options = {}) {
  * along with this program (see COPYING.txt and COPYING.LESSER.txt).
  * If not, see <http://www.gnu.org/licenses/>.
  */
-"use strict";
-
 var convexhull = new function () {
   // Returns a new array of points representing the convex hull of
   // the given set of points. The convex hull excludes collinear points.
@@ -2793,12 +2791,13 @@ function getPolygon(coordinates, allowedDistance) {
 function run(coordinates, allowedDistance) {
   var coordinatesByTime = splitByTimestamp(coordinates);
   var polygons = {};
+  console.log(coordinatesByTime);
 
   for (key in coordinatesByTime) {
     polygons[key] = getPolygon(coordinatesByTime[key], allowedDistance);
-    break;
   }
 
+  console.log(polygons);
   return polygons;
 }
 
@@ -2818,7 +2817,8 @@ var dataset_1 = JSON.parse(cords_full);
 var searchRadiusButton = document.getElementById('searchRadius');
 var arr = [];
 var map, googleMaps, heatmap, coordinates;
-var radius = 50; // const page = await import('./calculatePolygons')
+var radius = 50; // console.log(process.env.GOOGLE_MAPS_API_KEY)
+// const page = await import('./calculatePolygons')
 
 var covertToGoogleMapsCords = function covertToGoogleMapsCords(data) {
   return data.map(function (cord) {
@@ -2841,7 +2841,7 @@ var initMap = function _initMap() {
   document.addEventListener('DOMContentLoaded', function () {
     var mapElement = document.getElementById('map');
     loadGoogleMapsApi({
-      key: undefined,
+      key: "AIzaSyDVxL_-voEagurltC-HoSJk9WvgFMmkTAU",
       libraries: ['visualization']
     }).then(function (google) {
       googleMaps = google;
@@ -2857,13 +2857,13 @@ var initMap = function _initMap() {
         disableDoubleClickZoom: true,
         mapTypeId: 'satellite'
       });
-      dataset_1 = calculateWeight(dataset_1); // createPolygonLayer(dataset_1)
-
+      dataset_1 = calculateWeight(dataset_1);
+      createPolygonLayer(dataset_1);
       var colorizedDataset = divideColorToCordordinates(dataset_1);
       coordinates = covertToGoogleMapsCords(dataset_1); //createHeatmapLayer(coordinates)
       // createOverlayView()
+      // createCircelsLayer(colorizedDataset)
 
-      createCircelsLayer(colorizedDataset);
       writePositionsToJSONByClick();
     });
   });
@@ -2913,6 +2913,7 @@ var createPolygonLayer = function createPolygonLayer(coordinates) {
   allCords.forEach(function (cordsArray) {
     console.log(cordsArray);
     var polygon = creatPolygon(cordsArray, 'rgba(0, 0, 255, 1)', 1.2, 2, 'rgba(255, 0, 0, 1)', .55);
+    console.log('coord');
     polygon.setMap(map);
   });
 };
@@ -3052,7 +3053,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49672" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49908" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
