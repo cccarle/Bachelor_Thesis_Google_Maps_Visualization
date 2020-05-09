@@ -1,0 +1,23 @@
+{
+  "name": "2dv50e",
+  "version": "1.0.0",
+  "description": "2dv50e",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "google",
+    "maps"
+  ],
+  "author": "Carl Ejnarsson, Joel Carlsson",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "load-google-maps-api": "^2.0.2",
+    "parcel": "^1.12.4"
+  },
+  "devDependencies": {
+    "jest": "^25.4.0"
+  }
+}
