@@ -974,8 +974,8 @@ function getCoordinatesInXY(coordinates) {
   var coordinatesXY = [];
   coordinates.forEach(function (c) {
     coordinatesXY.push({
-      x: c.location.lng,
-      y: c.location.lat
+      x: c.location.lat,
+      y: c.location.lng
     });
   });
   return coordinatesXY;
@@ -1080,9 +1080,9 @@ var initMap = function _initMap() {
         disableDoubleClickZoom: true,
         mapTypeId: 'satellite'
       });
-      dataset_1 = calculateWeight(dataset_1);
+      dataset_1 = calculateWeight(dataset_1); // createPolygonLayer(dataset_1)
+
       var colorizedDataset = divideColorToCordordinates(dataset_1);
-      createPolygonLayer(dataset_1);
       coordinates = covertToGoogleMapsCords(dataset_1); //createHeatmapLayer(coordinates)
       // createOverlayView()
 
@@ -1132,10 +1132,12 @@ Uses creatPolygon() to creates a new separate polygon for every array returned b
 
 
 var createPolygonLayer = function createPolygonLayer(coordinates) {
-  var allCords = polygons(coordinates, 4)['10:00-10:59']; // allCords.forEach(cordsArray => {
-  //   let polygon = creatPolygon(cordsArray, 'rgba(0, 0, 255, 1)', 1.2, 2, 'rgba(255, 0, 0, 1)', .55)
-  //   polygon.setMap(map);
-  // });
+  var allCords = polygons(coordinates, 4)['10:00-10:59'];
+  allCords.forEach(function (cordsArray) {
+    console.log(cordsArray);
+    var polygon = creatPolygon(cordsArray, 'rgba(0, 0, 255, 1)', 1.2, 2, 'rgba(255, 0, 0, 1)', .55);
+    polygon.setMap(map);
+  });
 };
 /* 
 Create Heatmap-layer with coordinates array. 
@@ -1194,7 +1196,6 @@ var splitToChunks = function splitToChunks(array, parts) {
 };
 
 var createCircelsLayer = function createCircelsLayer(coordinates) {
-  console.log(coordinates);
   coordinates.forEach(function (coordinates) {
     for (var coord in coordinates) {
       var cityCircle = new window.google.maps.Circle({
@@ -1205,7 +1206,7 @@ var createCircelsLayer = function createCircelsLayer(coordinates) {
         fillOpacity: 0.35,
         map: map,
         center: coordinates[coord].location,
-        radius: Math.sin(coordinates[coord].timestamp) * 2 // * 100 // Calculate searchRadus
+        radius: Math.sin(coordinates[coord].timestamp) * 2 // SÖKRADIE - TODO: fixa vettigt sökradie algorithm
 
       });
     }

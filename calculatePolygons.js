@@ -80,8 +80,8 @@ function getCoordinatesInXY(coordinates) {
     let coordinatesXY = []
     coordinates.forEach(c => {
         coordinatesXY.push({
-            x: c.location.lng,
-            y: c.location.lat
+            x: c.location.lat,
+            y: c.location.lng
         })
     });
     return coordinatesXY

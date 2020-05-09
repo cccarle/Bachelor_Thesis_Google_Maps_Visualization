@@ -58,8 +58,8 @@ const initMap = function _initMap() {
       })
 
       dataset_1 = calculateWeight(dataset_1)
+     // createPolygonLayer(dataset_1)
       let colorizedDataset = divideColorToCordordinates(dataset_1)
-      createPolygonLayer(dataset_1)
       coordinates = covertToGoogleMapsCords(dataset_1)
       //createHeatmapLayer(coordinates)
       // createOverlayView()
@@ -117,12 +117,12 @@ Uses creatPolygon() to creates a new separate polygon for every array returned b
 */
 
 const createPolygonLayer = (coordinates) => {
-  let allCords = polygons(coordinates, 4)['10:00-10:59']
-
-  // allCords.forEach(cordsArray => {
-  //   let polygon = creatPolygon(cordsArray, 'rgba(0, 0, 255, 1)', 1.2, 2, 'rgba(255, 0, 0, 1)', .55)
-  //   polygon.setMap(map);
-  // });
+let allCords = polygons(coordinates, 4)['10:00-10:59']
+    allCords.forEach(cordsArray => {
+    console.log(cordsArray)
+    let polygon = creatPolygon(cordsArray, 'rgba(0, 0, 255, 1)', 1.2, 2, 'rgba(255, 0, 0, 1)', .55)
+    polygon.setMap(map);
+  });
 }
 
 
@@ -215,7 +215,6 @@ const splitToChunks = (array, parts) => {
 
 const createCircelsLayer = (coordinates) => {
 
-  console.log(coordinates)
   coordinates.forEach(coordinates => {
 
     for (var coord in coordinates) {
@@ -227,7 +226,7 @@ const createCircelsLayer = (coordinates) => {
         fillOpacity: 0.35,
         map: map,
         center: coordinates[coord].location,
-        radius: Math.sin(coordinates[coord].timestamp) * 2// * 100 // Calculate searchRadus
+        radius: Math.sin(coordinates[coord].timestamp) * 2 // SÖKRADIE - TODO: fixa vettigt sökradie algorithm
       });
     }
   });
