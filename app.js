@@ -50,15 +50,20 @@ const initMap = function _initMap() {
           lng: 16.321899075213206,
         },
         zoom: 19,
+        zoomControl: false,
+        scaleControl: false,
+        scrollwheel: false,
+        disableDoubleClickZoom: true,
         mapTypeId: 'satellite',
       })
 
       dataset_1 = calculateWeight(dataset_1)
+      let colorizedDataset = divideColorToCordordinates(dataset_1)
       createPolygonLayer(dataset_1)
       coordinates = covertToGoogleMapsCords(dataset_1)
       //createHeatmapLayer(coordinates)
       // createOverlayView()
-      createCircelsLayer(dataset_1)
+      createCircelsLayer(colorizedDataset)
       writePositionsToJSONByClick()
 
     })
@@ -114,10 +119,10 @@ Uses creatPolygon() to creates a new separate polygon for every array returned b
 const createPolygonLayer = (coordinates) => {
   let allCords = polygons(coordinates, 4)['10:00-10:59']
 
-  allCords.forEach(cordsArray => {
-    let polygon = creatPolygon(cordsArray, 'rgba(0, 0, 255, 1)', 1.2, 2, 'rgba(255, 0, 0, 1)', .55)
-    polygon.setMap(map);
-  });
+  // allCords.forEach(cordsArray => {
+  //   let polygon = creatPolygon(cordsArray, 'rgba(0, 0, 255, 1)', 1.2, 2, 'rgba(255, 0, 0, 1)', .55)
+  //   polygon.setMap(map);
+  // });
 }
 
 
@@ -147,25 +152,85 @@ const createHeatmapLayer = (coordinates) => {
 
 }
 
+// sex färger 
+// sortera dataset på timestamp
+// dela upp sorterade dataset på 6 
+// assigna varje del till en färg
+
+const divideColorToCordordinates = (coordinates) => {
+
+  coordinates.sort(function (a, b) {
+    return a.timestamp - b.timestamp
+  })
+
+  let gradient = [
+    'rgba(0, 0, 255, 0)',
+    'rgba(0, 0, 255, 1)',
+    'rgba(55, 0, 200, 1)',
+    'rgba(125, 0, 120, 1)',
+    'rgba(200, 0, 55, 1)',
+    'rgba(255, 0, 0, 1)',
+  ]
+
+  let dividedArray = splitToChunks(coordinates, 6)
+
+  dividedArray[0].forEach(element => {
+    element.color = 'rgba(0, 0, 255, 0)'
+  });
+
+  dividedArray[1].forEach(element => {
+    element.color = 'rgba(0, 0, 255, 1)'
+  });
+
+  dividedArray[2].forEach(element => {
+    element.color = 'rgba(55, 0, 200, 1)'
+  });
+
+  dividedArray[3].forEach(element => {
+    element.color = 'rgba(125, 0, 120, 1)'
+  });
+
+  dividedArray[4].forEach(element => {
+    element.color = 'rgba(200, 0, 55, 1)'
+  });
+
+  dividedArray[5].forEach(element => {
+    element.color = 'rgba(255, 0, 0, 1)'
+  });
+
+  return dividedArray
+
+}
 
 
 
-// create circels 
+const splitToChunks = (array, parts) => {
+  let result = [];
+  for (let i = parts; i > 0; i--) {
+    result.push(array.splice(0, Math.ceil(array.length / i)));
+  }
+  return result;
+}
+
 
 const createCircelsLayer = (coordinates) => {
- 
-  for (var coord in coordinates) {
-    var cityCircle = new window.google.maps.Circle({
-      strokeColor: '#FF0000',
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: '#FF0000',
-      fillOpacity: 0.35,
-      map: map,
-      center: coordinates[coord].location,
-      radius: Math.sin(coordinates[coord].timestamp) * 2// * 100 // Calculate searchRadus
-    });
-  }
+
+  console.log(coordinates)
+  coordinates.forEach(coordinates => {
+
+    for (var coord in coordinates) {
+      var cityCircle = new window.google.maps.Circle({
+        strokeColor: '#FF0000',
+        strokeOpacity: 0.2,
+        strokeWeight: 2,
+        fillColor: coordinates[coord].color,
+        fillOpacity: 0.35,
+        map: map,
+        center: coordinates[coord].location,
+        radius: Math.sin(coordinates[coord].timestamp) * 2// * 100 // Calculate searchRadus
+      });
+    }
+  });
 }
 
 const changeRadius = () => {

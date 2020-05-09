@@ -1074,14 +1074,19 @@ var initMap = function _initMap() {
           lng: 16.321899075213206
         },
         zoom: 19,
+        zoomControl: false,
+        scaleControl: false,
+        scrollwheel: false,
+        disableDoubleClickZoom: true,
         mapTypeId: 'satellite'
       });
       dataset_1 = calculateWeight(dataset_1);
+      var colorizedDataset = divideColorToCordordinates(dataset_1);
       createPolygonLayer(dataset_1);
       coordinates = covertToGoogleMapsCords(dataset_1); //createHeatmapLayer(coordinates)
       // createOverlayView()
 
-      createCircelsLayer(dataset_1);
+      createCircelsLayer(colorizedDataset);
       writePositionsToJSONByClick();
     });
   });
@@ -1127,11 +1132,10 @@ Uses creatPolygon() to creates a new separate polygon for every array returned b
 
 
 var createPolygonLayer = function createPolygonLayer(coordinates) {
-  var allCords = polygons(coordinates, 4)['10:00-10:59'];
-  allCords.forEach(function (cordsArray) {
-    var polygon = creatPolygon(cordsArray, 'rgba(0, 0, 255, 1)', 1.2, 2, 'rgba(255, 0, 0, 1)', .55);
-    polygon.setMap(map);
-  });
+  var allCords = polygons(coordinates, 4)['10:00-10:59']; // allCords.forEach(cordsArray => {
+  //   let polygon = creatPolygon(cordsArray, 'rgba(0, 0, 255, 1)', 1.2, 2, 'rgba(255, 0, 0, 1)', .55)
+  //   polygon.setMap(map);
+  // });
 };
 /* 
 Create Heatmap-layer with coordinates array. 
@@ -1146,23 +1150,66 @@ var createHeatmapLayer = function createHeatmapLayer(coordinates) {
   heatmap.set('radius', heatmap.get('radius') ? radius : radius);
   var gradient = ['rgba(0, 0, 255, 0)', 'rgba(0, 0, 255, 1)', 'rgba(55, 0, 200, 1)', 'rgba(125, 0, 120, 1)', 'rgba(200, 0, 55, 1)', 'rgba(255, 0, 0, 1)'];
   heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
-}; // create circels 
+}; // sex färger 
+// sortera dataset på timestamp
+// dela upp sorterade dataset på 6 
+// assigna varje del till en färg
 
+
+var divideColorToCordordinates = function divideColorToCordordinates(coordinates) {
+  coordinates.sort(function (a, b) {
+    return a.timestamp - b.timestamp;
+  });
+  var gradient = ['rgba(0, 0, 255, 0)', 'rgba(0, 0, 255, 1)', 'rgba(55, 0, 200, 1)', 'rgba(125, 0, 120, 1)', 'rgba(200, 0, 55, 1)', 'rgba(255, 0, 0, 1)'];
+  var dividedArray = splitToChunks(coordinates, 6);
+  dividedArray[0].forEach(function (element) {
+    element.color = 'rgba(0, 0, 255, 0)';
+  });
+  dividedArray[1].forEach(function (element) {
+    element.color = 'rgba(0, 0, 255, 1)';
+  });
+  dividedArray[2].forEach(function (element) {
+    element.color = 'rgba(55, 0, 200, 1)';
+  });
+  dividedArray[3].forEach(function (element) {
+    element.color = 'rgba(125, 0, 120, 1)';
+  });
+  dividedArray[4].forEach(function (element) {
+    element.color = 'rgba(200, 0, 55, 1)';
+  });
+  dividedArray[5].forEach(function (element) {
+    element.color = 'rgba(255, 0, 0, 1)';
+  });
+  return dividedArray;
+};
+
+var splitToChunks = function splitToChunks(array, parts) {
+  var result = [];
+
+  for (var i = parts; i > 0; i--) {
+    result.push(array.splice(0, Math.ceil(array.length / i)));
+  }
+
+  return result;
+};
 
 var createCircelsLayer = function createCircelsLayer(coordinates) {
-  for (var coord in coordinates) {
-    var cityCircle = new window.google.maps.Circle({
-      strokeColor: '#FF0000',
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: '#FF0000',
-      fillOpacity: 0.35,
-      map: map,
-      center: coordinates[coord].location,
-      radius: Math.sin(coordinates[coord].timestamp) * 2 // * 100 // Calculate searchRadus
+  console.log(coordinates);
+  coordinates.forEach(function (coordinates) {
+    for (var coord in coordinates) {
+      var cityCircle = new window.google.maps.Circle({
+        strokeColor: '#FF0000',
+        strokeOpacity: 0.2,
+        strokeWeight: 2,
+        fillColor: coordinates[coord].color,
+        fillOpacity: 0.35,
+        map: map,
+        center: coordinates[coord].location,
+        radius: Math.sin(coordinates[coord].timestamp) * 2 // * 100 // Calculate searchRadus
 
-    });
-  }
+      });
+    }
+  });
 };
 
 var changeRadius = function changeRadius() {
