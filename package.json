@@ -13,6 +13,7 @@
   "author": "Carl Ejnarsson, Joel Carlsson",
   "license": "ISC",
   "dependencies": {
+    "concaveman": "^1.1.1",
     "dotenv": "^8.2.0",
     "load-google-maps-api": "^2.0.2",
     "parcel": "^1.12.4"

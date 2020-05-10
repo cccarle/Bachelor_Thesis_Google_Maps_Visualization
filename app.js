@@ -9,7 +9,7 @@ let one_coordinates = fs.readFileSync('./assets/chords_one.json', 'utf8')
 let dataset_1 = JSON.parse(cords_full)
 let searchRadiusButton = document.getElementById('searchRadius')
 let arr = []
-let map, googleMaps, heatmap, coordinates
+let map, googleMaps, heatmap
 let radius = 50
 
 
@@ -57,19 +57,19 @@ const initMap = function _initMap() {
         mapTypeId: 'satellite',
       })
 
-      dataset_1 = calculateWeight(dataset_1)
-     // createPolygonLayer(dataset_1)
-      let colorizedDataset = divideColorToCordordinates(dataset_1)
-      coordinates = covertToGoogleMapsCords(dataset_1)
-      //createHeatmapLayer(coordinates)
-      // createOverlayView()
+      // Polygon-layer
+      createPolygonLayer(dataset_1)
+
+      // Circle-layer
+      let copyOfDataSet = [...dataset_1]
+      let colorizedDataset = divideColorToCordordinates(copyOfDataSet)
       createCircelsLayer(colorizedDataset)
+
+      // Heatmap-layer  
+      createHeatmapLayer(covertToGoogleMapsCords(calculateWeight(dataset_1)))
       writePositionsToJSONByClick()
-
     })
-
   })
-
 }
 
 
@@ -106,7 +106,7 @@ const creatPolygon = (coordinates, sColor, sOpacity, weight, fColor, fOpacity) =
     strokeWeight: weight,
     fillColor: fColor,
     fillOpacity: fOpacity,
-    draggable: false,
+    draggable: false
   });
 
   return polygonLayer
@@ -117,10 +117,9 @@ Uses creatPolygon() to creates a new separate polygon for every array returned b
 */
 
 const createPolygonLayer = (coordinates) => {
-let allCords = polygons(coordinates, 4)['10:00-10:59']
-    allCords.forEach(cordsArray => {
-    console.log(cordsArray)
-    let polygon = creatPolygon(cordsArray, 'rgba(0, 0, 255, 1)', 1.2, 2, 'rgba(255, 0, 0, 1)', .55)
+  let allCords = polygons(coordinates, 4)['10:00-10:59']
+  allCords.forEach(cordsArray => {
+    let polygon = creatPolygon(cordsArray, 'rgba(0, 0, 255, 1)', 1.2, 2, 'rgba(255, 0, 0, 1)', .85)
     polygon.setMap(map);
   });
 }
@@ -131,6 +130,7 @@ Create Heatmap-layer with coordinates array.
 */
 
 const createHeatmapLayer = (coordinates) => {
+
   heatmap = new googleMaps.visualization.HeatmapLayer({
     data: coordinates,
   })
@@ -152,10 +152,6 @@ const createHeatmapLayer = (coordinates) => {
 
 }
 
-// sex färger 
-// sortera dataset på timestamp
-// dela upp sorterade dataset på 6 
-// assigna varje del till en färg
 
 const divideColorToCordordinates = (coordinates) => {
 
@@ -163,19 +159,12 @@ const divideColorToCordordinates = (coordinates) => {
     return a.timestamp - b.timestamp
   })
 
-  let gradient = [
-    'rgba(0, 0, 255, 0)',
-    'rgba(0, 0, 255, 1)',
-    'rgba(55, 0, 200, 1)',
-    'rgba(125, 0, 120, 1)',
-    'rgba(200, 0, 55, 1)',
-    'rgba(255, 0, 0, 1)',
-  ]
 
   let dividedArray = splitToChunks(coordinates, 6)
 
+  // TODO: snygga till dessa foreach till en nestad foreach
   dividedArray[0].forEach(element => {
-    element.color = 'rgba(0, 0, 255, 0)'
+    element.color = 'rgba(0, 0, 255, 0.5)'
   });
 
   dividedArray[1].forEach(element => {
@@ -218,7 +207,7 @@ const createCircelsLayer = (coordinates) => {
   coordinates.forEach(coordinates => {
 
     for (var coord in coordinates) {
-      var cityCircle = new window.google.maps.Circle({
+      var coordCircle = new window.google.maps.Circle({
         strokeColor: '#FF0000',
         strokeOpacity: 0.2,
         strokeWeight: 2,

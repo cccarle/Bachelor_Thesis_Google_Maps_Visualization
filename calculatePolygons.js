@@ -1,4 +1,5 @@
 const convexhull = require('./convec_hull')
+const concaveman = require('concaveman')
 
 
 function splitByTimestamp(coordinates) {
@@ -100,7 +101,8 @@ function getXYCoordinatesInLatLng(coordinates) {
 
 function calculatePolygon(coordinates) {
     let coordinatesXY = getCoordinatesInXY(coordinates)
-    let polygonXY = convexhull.makeHull(coordinatesXY)
+    // let polygonXY = convexhull.makeHull(coordinatesXY)
+    let polygonXY = concaveman(coordinatesXY)
     let polygonLatLng = getXYCoordinatesInLatLng(polygonXY)
     return polygonLatLng
 }
