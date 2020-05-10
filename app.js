@@ -4,12 +4,15 @@ let fs = require('fs')
 let polygons = require('./calculatePolygons')
 
 let cords_full = fs.readFileSync('./assets/cords_full.json', 'utf8')
+let cords_hours = fs.readFileSync('./assets/coords_hours.json', 'utf8')
 let one_coordinates = fs.readFileSync('./assets/chords_one.json', 'utf8')
 let dataset_1 = JSON.parse(cords_full)
+let dataset_2 = JSON.parse(cords_hours)
 
 let searchRadiusButton = document.getElementById('searchRadius')
 let map, googleMaps, heatmap
 let radius = 50
+let searchRadius = 2
 
 
 
@@ -54,7 +57,7 @@ const initMap = function _initMap() {
       })
 
       // Polygon-layer
-      createPolygonLayer(dataset_1)
+      // createPolygonLayer(dataset_2)
 
       // Circle-layer
       let copyOfDataSet = [...dataset_1]
@@ -62,7 +65,7 @@ const initMap = function _initMap() {
       createCircelsLayer(colorizedDataset)
 
       // Heatmap-layer  
-      createHeatmapLayer(covertToGoogleMapsCords(calculateWeight(dataset_1)))
+      // createHeatmapLayer(covertToGoogleMapsCords(calculateWeight(dataset_1)))
       writePositionsToJSONByClick()
     })
   })
@@ -93,15 +96,22 @@ Uses creatPolygon() to creates a new separate polygon for every array returned b
 */
 
 const createPolygonLayer = (coordinates) => {
-  let allCords = polygons(coordinates, 4)['10:00-10:59']
-  allCords.forEach(cordsArray => {
-    let polygon = creatPolygon(cordsArray, 'rgba(0, 0, 255, 1)', 1.2, 2, 'rgba(255, 0, 0, 1)', .85)
-    polygon.setMap(map);
-  });
+  let allPolygons = polygons(coordinates, 4)
+  let objLen = Object.keys(allPolygons).length
+  let i = 0
+  for (let key in allPolygons) {
+    allPolygons[key].forEach(cordsArray => {
+      let risingColor = (255 / objLen) * (i + 1)
+      let sinkingColor = 255 - ((255 / objLen) * (i + 1))
+      let polygon = creatPolygon(cordsArray, 'rgba(' + risingColor + ', 0, ' + sinkingColor + ', 1)', 1.2, 2, 'rgba(' + risingColor + ', 0, ' + sinkingColor + ', 1)', .85)
+      polygon.setMap(map);
+    });
+    i++
+  }
 }
 
 const createCircelsLayer = (coordinates) => {
-  coordinates.forEach(coordinates => {
+  coordinates.forEach((coordinates) => {
     for (let coord in coordinates) {
       new window.google.maps.Circle({
         strokeColor: '#FF0000',
@@ -111,7 +121,7 @@ const createCircelsLayer = (coordinates) => {
         fillOpacity: 0.35,
         map: map,
         center: coordinates[coord].location,
-        radius: 2 // SÖKRADIE - TODO: fixa vettigt sökradie algorithm
+        radius: searchRadius
       });
     }
   });
@@ -145,50 +155,6 @@ const createHeatmapLayer = (coordinates) => {
 }
 
 
-
-const divideColorToCordordinates = (coordinates) => {
-
-  let dividedArray = splitToChunks(sortByTimestamp(coordinates), 6)
-
-  // TODO: snygga till dessa foreach till en nestad foreach
-  dividedArray[0].forEach(element => {
-    element.color = 'rgba(0, 0, 255, 0.5)'
-  });
-
-  dividedArray[1].forEach(element => {
-    element.color = 'rgba(0, 0, 255, 1)'
-  });
-
-  dividedArray[2].forEach(element => {
-    element.color = 'rgba(55, 0, 200, 1)'
-  });
-
-  dividedArray[3].forEach(element => {
-    element.color = 'rgba(125, 0, 120, 1)'
-  });
-
-  dividedArray[4].forEach(element => {
-    element.color = 'rgba(200, 0, 55, 1)'
-  });
-
-  dividedArray[5].forEach(element => {
-    element.color = 'rgba(255, 0, 0, 1)'
-  });
-
-  return dividedArray
-
-}
-
-
-const splitToChunks = (array, parts) => {
-  let result = [];
-  for (let i = parts; i > 0; i--) {
-    result.push(array.splice(0, Math.ceil(array.length / i)));
-  }
-  return result;
-}
-
-
 const calculateWeight = (stdCoordinates) => {
   let crds = JSON.parse(JSON.stringify(stdCoordinates))
   crds = sortByTimestamp(crds)
@@ -203,6 +169,37 @@ const calculateWeight = (stdCoordinates) => {
 
   return crds
 }
+
+const divideColorToCordordinates = (coordinates) => {
+
+  let dividedArray = splitToChunks(sortByTimestamp(coordinates), 6)
+
+
+
+  dividedArray.forEach((arr, i) => {
+    let colorDown = 255 - ((255 / dividedArray.length) * (i + 1))
+    let colorUp = (255 / dividedArray.length) * (i + 1)
+    arr.forEach(element => {
+      element.color = 'rgba(' + colorUp + ', 0, ' + colorDown + ', ' + (i > 0 ? 1 : 1) + ')' // Istället för (i > 0 ? 1 : 0.5), Köra: 1?
+    });
+
+  });
+
+
+
+  return dividedArray
+
+}
+
+
+const splitToChunks = (array, parts) => {
+  let result = [];
+  for (let i = parts; i > 0; i--) {
+    result.push(array.splice(0, Math.ceil(array.length / i)));
+  }
+  return result;
+}
+
 
 const changeRadius = () => {
   searchRadiusButton.addEventListener('click', () => {

@@ -99,11 +99,37 @@ function getXYCoordinatesInLatLng(coordinates) {
     return coordinatesLatLng
 }
 
+function getCoordinatesInArray(coordinates) {
+    let coordinatesArr = []
+    coordinates.forEach(c => {
+        coordinatesArr.push([
+            c.location.lat,
+            c.location.lng
+        ])
+    });
+    return coordinatesArr
+}
+
+function getArrayCoordinatesInLatLng(coordinates) {
+    let coordinatesLatLng = []
+    coordinates.forEach(c => {
+        coordinatesLatLng.push({
+            lat: c[0],
+            lng: c[1]
+        })
+    });
+    return coordinatesLatLng
+}
+
 function calculatePolygon(coordinates) {
-    let coordinatesXY = getCoordinatesInXY(coordinates)
+    // let coordinatesXY = getCoordinatesInXY(coordinates)
+    let coordinatesArr = getCoordinatesInArray(coordinates)
     // let polygonXY = convexhull.makeHull(coordinatesXY)
-    let polygonXY = concaveman(coordinatesXY)
-    let polygonLatLng = getXYCoordinatesInLatLng(polygonXY)
+    // coordinatesXY.concavity = 1
+    // coordinatesXY.lengthThreshold = 1
+    let polygonXY = concaveman(coordinatesArr, 1, 2)
+    // let polygonLatLng = getXYCoordinatesInLatLng(polygonXY)
+    let polygonLatLng = getArrayCoordinatesInLatLng(polygonXY)
     return polygonLatLng
 }
 
@@ -126,6 +152,7 @@ function getPolygon(coordinates, allowedDistance) {
 
 function run(coordinates, allowedDistance) {
     let coordinatesByTime = splitByTimestamp(coordinates)
+    console.log(coordinatesByTime)
     let polygons = {}
     for (let key in coordinatesByTime) {
         polygons[key] = getPolygon(coordinatesByTime[key], allowedDistance)
