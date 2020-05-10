@@ -2827,9 +2827,8 @@ var cords_full = "[{\n    \"location\": {\n        \"lat\": 56.65731472997458,\n
 var one_coordinates = "[{\n    \"location\": {\n        \"lat\": 56.65748132140324,\n        \"lng\": 16.323191484911067\n    },\n    \"weight\": 1,\n    \"timestamp\": 1586507332475\n}]";
 var dataset_1 = JSON.parse(cords_full);
 var searchRadiusButton = document.getElementById('searchRadius');
-var arr = [];
 var map, googleMaps, heatmap;
-var radius = 50; // const page = await import('./calculatePolygons')
+var radius = 50;
 
 var covertToGoogleMapsCords = function covertToGoogleMapsCords(data) {
   return data.map(function (cord) {
@@ -2881,26 +2880,8 @@ var initMap = function _initMap() {
     });
   });
 };
-
-var calculateWeight = function calculateWeight(stdCoordinates) {
-  var crds = JSON.parse(JSON.stringify(stdCoordinates));
-  crds.sort(function (a, b) {
-    return a.timestamp - b.timestamp;
-  });
-
-  if (crds.length > 1) {
-    var diff = crds[crds.length - 1].timestamp - crds[0].timestamp;
-    var i = 1;
-    crds.forEach(function (element) {
-      var percent = (element.timestamp - crds[0].timestamp) / diff * 100;
-      element.weight = parseFloat(percent.toFixed(1)) + 1;
-    });
-  }
-
-  return crds;
-};
 /* 
-Create Polygon with based on the given parameters. 
+Create Polygon based on the given parameters. 
 */
 
 
@@ -2928,6 +2909,24 @@ var createPolygonLayer = function createPolygonLayer(coordinates) {
     polygon.setMap(map);
   });
 };
+
+var createCircelsLayer = function createCircelsLayer(coordinates) {
+  coordinates.forEach(function (coordinates) {
+    for (var coord in coordinates) {
+      new window.google.maps.Circle({
+        strokeColor: '#FF0000',
+        strokeOpacity: 0.2,
+        strokeWeight: 2,
+        fillColor: coordinates[coord].color,
+        fillOpacity: 0.35,
+        map: map,
+        center: coordinates[coord].location,
+        radius: 2 // SÖKRADIE - TODO: fixa vettigt sökradie algorithm
+
+      });
+    }
+  });
+};
 /* 
 Create Heatmap-layer with coordinates array. 
 */
@@ -2944,10 +2943,7 @@ var createHeatmapLayer = function createHeatmapLayer(coordinates) {
 };
 
 var divideColorToCordordinates = function divideColorToCordordinates(coordinates) {
-  coordinates.sort(function (a, b) {
-    return a.timestamp - b.timestamp;
-  });
-  var dividedArray = splitToChunks(coordinates, 6); // TODO: snygga till dessa foreach till en nestad foreach
+  var dividedArray = splitToChunks(sortByTimestamp(coordinates), 6); // TODO: snygga till dessa foreach till en nestad foreach
 
   dividedArray[0].forEach(function (element) {
     element.color = 'rgba(0, 0, 255, 0.5)';
@@ -2980,22 +2976,19 @@ var splitToChunks = function splitToChunks(array, parts) {
   return result;
 };
 
-var createCircelsLayer = function createCircelsLayer(coordinates) {
-  coordinates.forEach(function (coordinates) {
-    for (var coord in coordinates) {
-      var coordCircle = new window.google.maps.Circle({
-        strokeColor: '#FF0000',
-        strokeOpacity: 0.2,
-        strokeWeight: 2,
-        fillColor: coordinates[coord].color,
-        fillOpacity: 0.35,
-        map: map,
-        center: coordinates[coord].location,
-        radius: Math.sin(coordinates[coord].timestamp) * 2 // SÖKRADIE - TODO: fixa vettigt sökradie algorithm
+var calculateWeight = function calculateWeight(stdCoordinates) {
+  var crds = JSON.parse(JSON.stringify(stdCoordinates));
+  crds = sortByTimestamp(crds);
 
-      });
-    }
-  });
+  if (crds.length > 1) {
+    var diff = crds[crds.length - 1].timestamp - crds[0].timestamp;
+    crds.forEach(function (element) {
+      var percent = (element.timestamp - crds[0].timestamp) / diff * 100;
+      element.weight = parseFloat(percent.toFixed(1)) + 1;
+    });
+  }
+
+  return crds;
 };
 
 var changeRadius = function changeRadius() {
@@ -3024,9 +3017,13 @@ var writePositionsToJSONByClick = function writePositionsToJSONByClick() {
       timestamp: Date.now()
     });
     heatmap.setMap(null);
-    var data = calculateWeight(arr);
-    var coordinates = covertToGoogleMapsCords(data);
-    createHeatmapLayer(coordinates);
+    createHeatmapLayer(covertToGoogleMapsCords(calculateWeight(arr)));
+  });
+};
+
+var sortByTimestamp = function sortByTimestamp(coordinates) {
+  return coordinates.sort(function (a, b) {
+    return a.timestamp - b.timestamp;
   });
 };
 

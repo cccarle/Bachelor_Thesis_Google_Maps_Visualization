@@ -5,16 +5,12 @@ let polygons = require('./calculatePolygons')
 
 let cords_full = fs.readFileSync('./assets/cords_full.json', 'utf8')
 let one_coordinates = fs.readFileSync('./assets/chords_one.json', 'utf8')
-
 let dataset_1 = JSON.parse(cords_full)
+
 let searchRadiusButton = document.getElementById('searchRadius')
-let arr = []
 let map, googleMaps, heatmap
 let radius = 50
 
-
-
-// const page = await import('./calculatePolygons')
 
 
 const covertToGoogleMapsCords = (data) => {
@@ -73,40 +69,20 @@ const initMap = function _initMap() {
 }
 
 
-const calculateWeight = (stdCoordinates) => {
-  let crds = JSON.parse(JSON.stringify(stdCoordinates))
-
-  crds.sort(function (a, b) {
-    return a.timestamp - b.timestamp
-  })
-
-  if (crds.length > 1) {
-    let diff = crds[crds.length - 1].timestamp - crds[0].timestamp
-    let i = 1
-    crds.forEach((element) => {
-      let percent = ((element.timestamp - crds[0].timestamp) / diff) * 100
-      element.weight = parseFloat(percent.toFixed(1)) + 1
-    })
-  }
-
-  return crds
-}
-
-
 /* 
-Create Polygon with based on the given parameters. 
+Create Polygon based on the given parameters. 
 */
 
 const creatPolygon = (coordinates, sColor, sOpacity, weight, fColor, fOpacity) => {
-
-  var polygonLayer = new google.maps.Polygon({
+  let polygonLayer = new google.maps.Polygon({
     paths: coordinates,
     strokeColor: sColor,
     strokeOpacity: sOpacity,
     strokeWeight: weight,
     fillColor: fColor,
     fillOpacity: fOpacity,
-    draggable: false
+    draggable: false,
+
   });
 
   return polygonLayer
@@ -124,6 +100,22 @@ const createPolygonLayer = (coordinates) => {
   });
 }
 
+const createCircelsLayer = (coordinates) => {
+  coordinates.forEach(coordinates => {
+    for (let coord in coordinates) {
+      new window.google.maps.Circle({
+        strokeColor: '#FF0000',
+        strokeOpacity: 0.2,
+        strokeWeight: 2,
+        fillColor: coordinates[coord].color,
+        fillOpacity: 0.35,
+        map: map,
+        center: coordinates[coord].location,
+        radius: 2 // SÖKRADIE - TODO: fixa vettigt sökradie algorithm
+      });
+    }
+  });
+}
 
 /* 
 Create Heatmap-layer with coordinates array. 
@@ -153,14 +145,10 @@ const createHeatmapLayer = (coordinates) => {
 }
 
 
+
 const divideColorToCordordinates = (coordinates) => {
 
-  coordinates.sort(function (a, b) {
-    return a.timestamp - b.timestamp
-  })
-
-
-  let dividedArray = splitToChunks(coordinates, 6)
+  let dividedArray = splitToChunks(sortByTimestamp(coordinates), 6)
 
   // TODO: snygga till dessa foreach till en nestad foreach
   dividedArray[0].forEach(element => {
@@ -192,7 +180,6 @@ const divideColorToCordordinates = (coordinates) => {
 }
 
 
-
 const splitToChunks = (array, parts) => {
   let result = [];
   for (let i = parts; i > 0; i--) {
@@ -202,23 +189,19 @@ const splitToChunks = (array, parts) => {
 }
 
 
-const createCircelsLayer = (coordinates) => {
+const calculateWeight = (stdCoordinates) => {
+  let crds = JSON.parse(JSON.stringify(stdCoordinates))
+  crds = sortByTimestamp(crds)
 
-  coordinates.forEach(coordinates => {
+  if (crds.length > 1) {
+    let diff = crds[crds.length - 1].timestamp - crds[0].timestamp
+    crds.forEach((element) => {
+      let percent = ((element.timestamp - crds[0].timestamp) / diff) * 100
+      element.weight = parseFloat(percent.toFixed(1)) + 1
+    })
+  }
 
-    for (var coord in coordinates) {
-      var coordCircle = new window.google.maps.Circle({
-        strokeColor: '#FF0000',
-        strokeOpacity: 0.2,
-        strokeWeight: 2,
-        fillColor: coordinates[coord].color,
-        fillOpacity: 0.35,
-        map: map,
-        center: coordinates[coord].location,
-        radius: Math.sin(coordinates[coord].timestamp) * 2 // SÖKRADIE - TODO: fixa vettigt sökradie algorithm
-      });
-    }
-  });
+  return crds
 }
 
 const changeRadius = () => {
@@ -236,6 +219,7 @@ Appends the "click-positions" longiture & latitude to the coordinates array.
 */
 
 const writePositionsToJSONByClick = () => {
+
   googleMaps.event.addListener(map, 'click', (event) => {
     arr.push({
       location: new window.google.maps.LatLng({
@@ -245,10 +229,17 @@ const writePositionsToJSONByClick = () => {
       weight: 1,
       timestamp: Date.now(),
     })
+
     heatmap.setMap(null)
-    let data = calculateWeight(arr)
-    let coordinates = covertToGoogleMapsCords(data)
-    createHeatmapLayer(coordinates)
+
+    createHeatmapLayer(covertToGoogleMapsCords(calculateWeight(arr)))
+  })
+}
+
+
+const sortByTimestamp = (coordinates) => {
+  return coordinates.sort(function (a, b) {
+    return a.timestamp - b.timestamp
   })
 }
 
