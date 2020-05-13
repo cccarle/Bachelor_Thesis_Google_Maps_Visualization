@@ -50,22 +50,20 @@ const initMap = function _initMap() {
         },
         zoom: 19,
         zoomControl: false,
-        scaleControl: false,
         scrollwheel: false,
         disableDoubleClickZoom: true,
         mapTypeId: 'satellite',
       })
 
       // Polygon-layer
-      // createPolygonLayer(dataset_2)
+  createPolygonLayer(dataset_2)
 
       // Circle-layer
       let copyOfDataSet = [...dataset_1]
       let colorizedDataset = divideColorToCordordinates(copyOfDataSet)
-      createCircelsLayer(colorizedDataset)
-
+     // createCirclesLayer(colorizedDataset)
       // Heatmap-layer  
-      // createHeatmapLayer(covertToGoogleMapsCords(calculateWeight(dataset_1)))
+    //   createHeatmapLayer(covertToGoogleMapsCords(calculateWeight(dataset_1)))
       writePositionsToJSONByClick()
     })
   })
@@ -73,44 +71,36 @@ const initMap = function _initMap() {
 
 
 /* 
-Create Polygon based on the given parameters. 
-*/
-
-const creatPolygon = (coordinates, sColor, sOpacity, weight, fColor, fOpacity) => {
-  let polygonLayer = new google.maps.Polygon({
-    paths: coordinates,
-    strokeColor: sColor,
-    strokeOpacity: sOpacity,
-    strokeWeight: weight,
-    fillColor: fColor,
-    fillOpacity: fOpacity,
-    draggable: false,
-
-  });
-
-  return polygonLayer
-}
-
-/* 
 Uses creatPolygon() to creates a new separate polygon for every array returned by polygons() method. 
 */
 
 const createPolygonLayer = (coordinates) => {
-  let allPolygons = polygons(coordinates, 4)
+  let allPolygons = polygons(coordinates, 10)
   let objLen = Object.keys(allPolygons).length
   let i = 0
   for (let key in allPolygons) {
     allPolygons[key].forEach(cordsArray => {
       let risingColor = (255 / objLen) * (i + 1)
       let sinkingColor = 255 - ((255 / objLen) * (i + 1))
-      let polygon = creatPolygon(cordsArray, 'rgba(' + risingColor + ', 0, ' + sinkingColor + ', 1)', 1.2, 2, 'rgba(' + risingColor + ', 0, ' + sinkingColor + ', 1)', .85)
+    
+      let polygon =  new google.maps.Polygon({
+        paths: cordsArray,
+        strokeColor:  'rgba(' + risingColor + ', 0, ' + sinkingColor + ', 1)',
+        strokeOpacity:  1.2,
+        strokeWeight: 2,
+        fillColor: 'rgba(' + risingColor + ', 0, ' + sinkingColor + ', 1)',
+        fillOpacity: .85,
+        draggable: false,
+    
+      });
+      
       polygon.setMap(map);
     });
     i++
   }
 }
 
-const createCircelsLayer = (coordinates) => {
+const createCirclesLayer = (coordinates) => {
   coordinates.forEach((coordinates) => {
     for (let coord in coordinates) {
       new window.google.maps.Circle({
@@ -172,15 +162,14 @@ const calculateWeight = (stdCoordinates) => {
 
 const divideColorToCordordinates = (coordinates) => {
 
-  let dividedArray = splitToChunks(sortByTimestamp(coordinates), 6)
-
+  let dividedArray = splitIntoParts(sortByTimestamp(coordinates), 10)
 
 
   dividedArray.forEach((arr, i) => {
     let colorDown = 255 - ((255 / dividedArray.length) * (i + 1))
     let colorUp = (255 / dividedArray.length) * (i + 1)
     arr.forEach(element => {
-      element.color = 'rgba(' + colorUp + ', 0, ' + colorDown + ', ' + (i > 0 ? 1 : 1) + ')' // Istället för (i > 0 ? 1 : 0.5), Köra: 1?
+      element.color = 'rgba(' + colorUp + ', 0, ' + colorDown + ', ' + (i > 0 ? 1 : 1) + ')' 
     });
 
   });
@@ -192,7 +181,9 @@ const divideColorToCordordinates = (coordinates) => {
 }
 
 
-const splitToChunks = (array, parts) => {
+const splitIntoParts = (array, parts) => {
+  // array is the dataset that will be split into part.
+  // parts is how many parts the array will be divided into.
   let result = [];
   for (let i = parts; i > 0; i--) {
     result.push(array.splice(0, Math.ceil(array.length / i)));

@@ -127,7 +127,7 @@ function calculatePolygon(coordinates) {
     // let polygonXY = convexhull.makeHull(coordinatesXY)
     // coordinatesXY.concavity = 1
     // coordinatesXY.lengthThreshold = 1
-    let polygonXY = concaveman(coordinatesArr, 1, 2)
+    let polygonXY = concaveman(coordinatesArr)
     // let polygonLatLng = getXYCoordinatesInLatLng(polygonXY)
     let polygonLatLng = getArrayCoordinatesInLatLng(polygonXY)
     return polygonLatLng

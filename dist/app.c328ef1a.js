@@ -2792,7 +2792,7 @@ function calculatePolygon(coordinates) {
   // coordinatesXY.concavity = 1
   // coordinatesXY.lengthThreshold = 1
 
-  var polygonXY = concaveman(coordinatesArr, 1, 2); // let polygonLatLng = getXYCoordinatesInLatLng(polygonXY)
+  var polygonXY = concaveman(coordinatesArr); // let polygonLatLng = getXYCoordinatesInLatLng(polygonXY)
 
   var polygonLatLng = getArrayCoordinatesInLatLng(polygonXY);
   return polygonLatLng;
@@ -2889,40 +2889,22 @@ var initMap = function _initMap() {
         },
         zoom: 19,
         zoomControl: false,
-        scaleControl: false,
         scrollwheel: false,
         disableDoubleClickZoom: true,
         mapTypeId: 'satellite'
       }); // Polygon-layer
-      // createPolygonLayer(dataset_2)
-      // Circle-layer
+
+      createPolygonLayer(dataset_2); // Circle-layer
 
       var copyOfDataSet = _toConsumableArray(dataset_1);
 
-      var colorizedDataset = divideColorToCordordinates(copyOfDataSet);
-      createCircelsLayer(colorizedDataset); // Heatmap-layer  
-      // createHeatmapLayer(covertToGoogleMapsCords(calculateWeight(dataset_1)))
+      var colorizedDataset = divideColorToCordordinates(copyOfDataSet); // createCirclesLayer(colorizedDataset)
+      // Heatmap-layer  
+      //   createHeatmapLayer(covertToGoogleMapsCords(calculateWeight(dataset_1)))
 
       writePositionsToJSONByClick();
     });
   });
-};
-/* 
-Create Polygon based on the given parameters. 
-*/
-
-
-var creatPolygon = function creatPolygon(coordinates, sColor, sOpacity, weight, fColor, fOpacity) {
-  var polygonLayer = new google.maps.Polygon({
-    paths: coordinates,
-    strokeColor: sColor,
-    strokeOpacity: sOpacity,
-    strokeWeight: weight,
-    fillColor: fColor,
-    fillOpacity: fOpacity,
-    draggable: false
-  });
-  return polygonLayer;
 };
 /* 
 Uses creatPolygon() to creates a new separate polygon for every array returned by polygons() method. 
@@ -2930,7 +2912,7 @@ Uses creatPolygon() to creates a new separate polygon for every array returned b
 
 
 var createPolygonLayer = function createPolygonLayer(coordinates) {
-  var allPolygons = polygons(coordinates, 4);
+  var allPolygons = polygons(coordinates, 10);
   var objLen = Object.keys(allPolygons).length;
   var i = 0;
 
@@ -2938,14 +2920,22 @@ var createPolygonLayer = function createPolygonLayer(coordinates) {
     allPolygons[key].forEach(function (cordsArray) {
       var risingColor = 255 / objLen * (i + 1);
       var sinkingColor = 255 - 255 / objLen * (i + 1);
-      var polygon = creatPolygon(cordsArray, 'rgba(' + risingColor + ', 0, ' + sinkingColor + ', 1)', 1.2, 2, 'rgba(' + risingColor + ', 0, ' + sinkingColor + ', 1)', .85);
+      var polygon = new google.maps.Polygon({
+        paths: cordsArray,
+        strokeColor: 'rgba(' + risingColor + ', 0, ' + sinkingColor + ', 1)',
+        strokeOpacity: 1.2,
+        strokeWeight: 2,
+        fillColor: 'rgba(' + risingColor + ', 0, ' + sinkingColor + ', 1)',
+        fillOpacity: .85,
+        draggable: false
+      });
       polygon.setMap(map);
     });
     i++;
   }
 };
 
-var createCircelsLayer = function createCircelsLayer(coordinates) {
+var createCirclesLayer = function createCirclesLayer(coordinates) {
   coordinates.forEach(function (coordinates) {
     for (var coord in coordinates) {
       new window.google.maps.Circle({
@@ -2992,18 +2982,20 @@ var calculateWeight = function calculateWeight(stdCoordinates) {
 };
 
 var divideColorToCordordinates = function divideColorToCordordinates(coordinates) {
-  var dividedArray = splitToChunks(sortByTimestamp(coordinates), 6);
+  var dividedArray = splitIntoParts(sortByTimestamp(coordinates), 10);
   dividedArray.forEach(function (arr, i) {
     var colorDown = 255 - 255 / dividedArray.length * (i + 1);
     var colorUp = 255 / dividedArray.length * (i + 1);
     arr.forEach(function (element) {
-      element.color = 'rgba(' + colorUp + ', 0, ' + colorDown + ', ' + (i > 0 ? 1 : 1) + ')'; // Istället för (i > 0 ? 1 : 0.5), Köra: 1?
+      element.color = 'rgba(' + colorUp + ', 0, ' + colorDown + ', ' + (i > 0 ? 1 : 1) + ')';
     });
   });
   return dividedArray;
 };
 
-var splitToChunks = function splitToChunks(array, parts) {
+var splitIntoParts = function splitIntoParts(array, parts) {
+  // array is the dataset that will be split into part.
+  // parts is how many parts the array will be divided into.
   var result = [];
 
   for (var i = parts; i > 0; i--) {
@@ -3079,7 +3071,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62373" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54908" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
